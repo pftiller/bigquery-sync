@@ -1,4 +1,4 @@
-var pg = require('pg');
+// var pg = require('pg');
 
 var config = {
     user: process.env.USER,
@@ -9,4 +9,4 @@ var config = {
 };
 
 
-module.exports = new pg.Pool(config);
+// module.exports = new pg.Pool(config);

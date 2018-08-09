@@ -1,14 +1,22 @@
 const Redshift = require('node-redshift');
-const cron = require("node-cron");
+const CronJob = require('cron').CronJob;
 const bigquery = require('../modules/bigquery');
-const client = require('../modules/pool');
+// const client = require('../modules/pool');
+var client = {
+    user: process.env.USER,
+    password: process.env.DATABASE_SECRET,
+    host: process.env.HOST,
+    port: process.env.PORT ,
+    database: process.env.DATABASE
+};
 var redshift = new Redshift(client, {
     rawConnection: true
 });
 
 function getRedshiftData() {
     return new Promise(function(resolve, reject) {
-        redshift.connect(function(err, data) {
+        let data = {};
+        redshift.connect(function(err) {
             if (err) {
                 reject(err);
             } else {
@@ -16,32 +24,37 @@ function getRedshiftData() {
                         raw: true
                     })
                     .then(function(aw) {
-                        data.adwords = aw
+                        let tableId = 'adwords';
+                        data.payload = aw;
+                        bigquery.dataToBigQuery(data, tableId)
                     }),
                     redshift.query('SELECT * FROM "trade_desk"', {
                         raw: true
                     })
                     .then(function(ttd) {
-                        data.trade_desk = ttd
-                        if (data.trade_desk && data.adwords) {
-                            resolve((data));
+                        let tableId = 'trade_desk';
+                        data.payload = ttd;
+                        bigquery.dataToBigQuery(data, tableId);
+                        if (data.payload) {
+                            redshift.close();
+                            resolve('all done');
                         }
                     })
-            }
+           
+                }
         })
 
     })
 }
-cron.schedule('30 * * * * *', () => {
+new CronJob('30 * * * * *', function()  {
+    console.log('starting job');
     var redshiftPromise = getRedshiftData();
-    redshiftPromise.then(function(result) {
-        redshiftData = result;
-        console.log("finished job");
-        bigquery.dataToBigQuery(redshiftData)
+    redshiftPromise.then(function(response) {
+        console.log(response);
     }, function(err) {
         console.log(err);
     })
-});
+}, null, true, 'America/Chicago');
 
 
 module.exports = redshift;

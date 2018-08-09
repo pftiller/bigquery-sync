@@ -1,7 +1,5 @@
-// Aoo setup
 const express = require("express");
 const app = express();
-const redshift = require('./modules/redshift');
 
 const port = 5353;
 
