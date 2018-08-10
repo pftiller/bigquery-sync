@@ -1,5 +1,6 @@
 const Redshift = require('node-redshift');
 const CronJob = require('cron').CronJob;
+const query = require('./queries');
 const bigquery = require('../modules/bigquery');
 // const client = require('../modules/pool');
 var client = {
