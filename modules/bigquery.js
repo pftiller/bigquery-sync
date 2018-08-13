@@ -1,4 +1,4 @@
-function dataToBigQuery(data, tableId) {
+function dataToBigQuery(data, datasetId, tableId) {
 
   console.log('bigquery function has been called');
   const BigQuery = require('@google-cloud/bigquery');
@@ -6,7 +6,7 @@ function dataToBigQuery(data, tableId) {
       projectId: 'tc-data-warehouse',
       credentials: require('../keyfile')
   });
-let table = bigquery.dataset('sample').table(tableId);
+let table = bigquery.dataset(datasetId).table(tableId);
 
 table.insert(data.payload)
   .then(() => {

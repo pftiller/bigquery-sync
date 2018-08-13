@@ -1,6 +1,6 @@
 let accounts = [
     {
-        "name": "Altru Health",
+        "name": "altru_health",
         "adwords": 7550652164,
         "trade_desk": "4xgixgw"
     }
