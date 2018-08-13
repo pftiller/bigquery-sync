@@ -1,5 +1,6 @@
 const Redshift = require('node-redshift');
 const bigquery = require('../modules/bigquery');
+require('dotenv').config()
 let client = {
     user: process.env.USER,
     host: process.env.HOST,

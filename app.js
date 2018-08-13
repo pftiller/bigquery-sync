@@ -1,10 +1,9 @@
-const express = require("express");
-const app = express();
+var express = require('express');
+var app = express();
+
 const timer = require('./modules/timer');
 
-
-const port = 5353;
-
+const port = 8080;
 
 app.use(express.static('public'));
 

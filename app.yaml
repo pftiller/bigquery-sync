@@ -1,5 +1,7 @@
 env: flex
 runtime: nodejs
+manual_scaling:
+    instances: 1
 skip_files:
   - node_modules
   - keyfile.json
