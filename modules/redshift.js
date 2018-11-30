@@ -1,13 +1,22 @@
 const Redshift = require('node-redshift');
 const bigquery = require('../modules/bigquery');
 require('dotenv').config()
-let client = {
-    user: process.env.USER,
-    host: process.env.HOST,
-    port: process.env.PORT,
-    database: process.env.DATABASE
+let testClient = {
+    user: process.env.TEST_DATABASE_USER,
+    password: process.env.TEST_DATABASE_PASSWORD,
+    host: process.env.TEST_DATABASE_HOST,
+    port: process.env.TEST_DATABASE_PORT,
+    database: process.env.TEST_DATABASE
 };
-let redshift = new Redshift(client);
+let prodClient = {
+    user: process.env.PROD_DATABASE_USER,
+    password: process.env.PROD_DATABASE_PASSWORD,
+    host: process.env.PROD_DATABASE_HOST,
+    port: process.env.PROD_DATABASE_PORT,
+    database: process.env.PROD_DATABASE
+};
+
+let redshift = new Redshift(prodClient);
 
 function getRedshiftData(account, aw_query, ttd_query, combined_query) {
     let result={};
@@ -18,7 +27,7 @@ function getRedshiftData(account, aw_query, ttd_query, combined_query) {
                 raw: true
             })
             .then(function (aw) {
-                let tableId = 'vw_search_account_performance';
+                let tableId = 'adwords';
                 result.payload = aw;
                 bigquery.dataToBigQuery(result, datasetId, tableId)
             })
@@ -26,7 +35,7 @@ function getRedshiftData(account, aw_query, ttd_query, combined_query) {
                 raw: true
             })
             .then(function (ttd) {
-                let tableId = 'vw_ttd_performance';
+                let tableId = 'trade_desk';
                 result.payload = ttd;
                 bigquery.dataToBigQuery(result, datasetId, tableId)
             })
@@ -34,14 +43,9 @@ function getRedshiftData(account, aw_query, ttd_query, combined_query) {
                 raw: true
             })
             .then(function (combined) {
-                let tableId = 'vw_combined_performance';
+                let tableId = 'combined';
                 result.payload = combined;
-                bigquery.dataToBigQuery(result, datasetId, tableId)
-                console.log(`finished ${data.name} upload`)
-                setTimeout(function () {
-                    resolve('success');
-                    //reject('error');
-                }, 3000);
+                bigquery.dataToBigQuery(result, datasetId, tableId);
             })
     })
 }

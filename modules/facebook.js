@@ -1,70 +1,66 @@
+require('dotenv').config();
+const bigquery = require('../modules/bigquery');
+const pivoter = require('../modules/pivot');
 const adsSdk = require('facebook-nodejs-business-sdk');
 const AdAccount = adsSdk.AdAccount;
-const AdsInsights = adsSdk.AdsInsights;
-require('dotenv').config()
-let access_token = process.env.FBTOKEN;
+const Campaign = adsSdk.Campaign;
+
+const access_token = process.env.FBTOKEN;
+const app_secret = process.env.FB_APP_SECRET;
+const app_id = process.env.FB_APP_SECRET;
 const api = adsSdk.FacebookAdsApi.init(access_token);
-const account = new AdAccount('act_1331028070365251');
-const showDebugingInfo = true; // Setting this to true shows more debugging info.
-if(showDebugingInfo) {
-    api.setDebug(true);
-}
+// const showDebugingInfo = true;
+// if (showDebugingInfo) {
+//   api.setDebug(true);
+// }
 
+// const logApiCallResult = (apiCallName, data) => {
+//   console.log(apiCallName);
+//   if (showDebugingInfo) {
+//     console.log('Data:' + JSON.stringify(data));
+//   }
+// };
 
+let fields, params;
 
-let ads_insights;
-let ads_insights_id;
-
-
-function getData() {
-    console.log('inside receiveAcct');
-    const fields = [
-    'impressions',
-    ];
-    const params = {
-    'level' : 'campaign',
-    'filtering' : [],
-    'breakdowns' : ['ad_id'],
-    'time_range' : {'since':'2018-07-01','until':'2018-08-01'},
+function getData(client) {
+    let tableId = 'facebook';
+    let datasetId = client.name;
+    let campaignIds = [client.facebook_campaign]
+    fields = [
+        'ad_name',
+        'reach',
+        'impressions',
+        'actions',
+        'spend',
+        'outbound_clicks',
+        'unique_outbound_clicks',
+        'clicks',
+        'unique_clicks',
+        'video_p100_watched_actions'
+    ]
+    params = {
+        'action_attribution_windows': ['28d_view','28d_click'],
+        'action_breakdowns': ['action_type'],
+        'level' : 'ad',
+        'time_increment':  1,
+        'filtering': [{ field: 'campaign.id', operator: 'IN', value:  campaignIds }],
+        'breakdowns' : ['impression_device', 'publisher_platform'],
+        'time_range' : {'since':'2018-10-01','until':'2018-11-01'},
     };
-    account.getInsights(
+    const insightss = (new AdAccount(client.facebook_act)).getInsights(
     fields,
     params
     )
-    .then((result) => {
-    logApiCallResult('ads_insights api call complete.', result);
-    ads_insights_id = result[0].id;
+    .then(res => {
+        let data = JSON.stringify(res);
+        console.log(data);
     })
-    .catch((error) => {
-    console.log(error);
-    });
+    .catch(err => {
+        console.log('here is the error', err);
+    })    
+    // logApiCallResult('insightss api call complete.', insightss);
 }
-
-//     let ad_account_id = '';
-//     let account = new AdAccount(ad_account_id);
-//     account.read([AdAccount.Fields.name, AdAccount.Fields.age])
-//     .then((result) => {
-//             logApiCallResult('ads_insights api call complete.', result);
-//             ads_insights_id = result[0].id;
-//         })
-//         .catch((error) => {
-//             console.log(error);
-//         });
-// };
-   
-
-   
-
-  
-
-  const logApiCallResult = (apiCallName, data) => {
-    console.log(apiCallName);
-        if (showDebugingInfo) {
-            console.log('Data:' + JSON.stringify(data));
-            }
-        };
-
-     
 module.exports = {
     getData: getData
 }

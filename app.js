@@ -3,7 +3,7 @@ var app = express();
 
 const timer = require('./modules/timer');
 
-const port = 8080;
+const port = 5032;
 
 app.use(express.static('public'));
 
